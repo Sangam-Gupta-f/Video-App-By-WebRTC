@@ -38,3 +38,7 @@ io.on("connection", (socket) => {
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   });
 });
+
+app.get("/", (req, res) => {
+  res.send("WebRTC signaling server running");
+});
