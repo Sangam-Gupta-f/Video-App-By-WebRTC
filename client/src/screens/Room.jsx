@@ -138,6 +138,10 @@ const RoomPage = () => {
     socket.on("call:accepted", handleCallAccepted);
     socket.on("peer:nego:needed", handleNegoNeedIncomming);
     socket.on("peer:nego:final", handleNegoNeedFinal);
+    socket.on("ice-candidate", ({ candidate }) => {
+      console.log("GOT REMOTE ICE:", candidate);
+      peer.peer.addIceCandidate(candidate);
+    });
 
     return () => {
       socket.off("user:joined", handleUserJoined);

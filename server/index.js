@@ -1,6 +1,12 @@
-const { Server } = require("socket.io");
+// const { Server } = require("socket.io");
+import http from "http";
+import express from "express";
+import { Server } from "socket.io";
 
-const io = new Server(8000, {
+const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
   cors: {
     origin: "*",
   },
@@ -41,4 +47,8 @@ io.on("connection", (socket) => {
 
 app.get("/", (req, res) => {
   res.send("WebRTC signaling server running");
+});
+
+server.listen(process.env.PORT || 8000, () => {
+  console.log("Server running");
 });

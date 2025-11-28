@@ -17,6 +17,9 @@ class PeerService {
         ],
       });
     }
+    this.peer.onicecandidate = (event) => {
+      console.log("ICE CANDIDATE SENT:", event.candidate);
+    };
   }
 
   async getAnswer(offer) {
