@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useCallback, useState, useRef } from "react";
 import ReactPlayer from "react-player";
 import peer from "../service/peer";
 import { useSocket } from "../context/SocketProvider";
@@ -11,9 +11,25 @@ const RoomPage = () => {
   const [remoteStream, setRemoteStream] = useState();
   const [isCallStarted, setIsCallStarted] = useState(false);
 
+  const myVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+
   // ------------------------------------------------------------
   // GET MEDIA ONCE → WHEN PAGE LOADS
   // ------------------------------------------------------------
+
+  useEffect(() => {
+    if (myVideoRef.current && myStream) {
+      myVideoRef.current.srcObject = myStream;
+    }
+  }, [myStream]);
+
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
+
   useEffect(() => {
     const startCamera = async () => {
       try {
@@ -170,12 +186,12 @@ const RoomPage = () => {
       {myStream && (
         <>
           <h2>My Stream</h2>
-          <ReactPlayer
-            playing
+          <video
+            ref={myVideoRef}
+            autoPlay
+            playsInline
             muted
-            height="150px"
-            width="250px"
-            url={myStream}
+            style={{ width: "250px", height: "150px", background: "#000" }}
           />
         </>
       )}
@@ -183,11 +199,11 @@ const RoomPage = () => {
       {remoteStream && (
         <>
           <h2>Remote Stream</h2>
-          <ReactPlayer
-            playing
-            height="150px"
-            width="250px"
-            url={remoteStream}
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            playsInline
+            style={{ width: "250px", height: "150px", background: "#000" }}
           />
         </>
       )}
