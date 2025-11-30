@@ -31,6 +31,21 @@ const RoomPage = () => {
   }, [remoteStream]);
 
   useEffect(() => {
+    if (!peer.peer) return;
+
+    peer.peer.onicecandidate = (event) => {
+      if (event.candidate && remoteSocketId) {
+        console.log("SENDING ICE TO REMOTE:", event.candidate);
+
+        socket.emit("ice-candidate", {
+          to: remoteSocketId,
+          candidate: event.candidate,
+        });
+      }
+    };
+  }, [remoteSocketId, socket]);
+
+  useEffect(() => {
     const startCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({

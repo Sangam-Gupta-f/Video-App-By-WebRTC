@@ -51,6 +51,14 @@ io.on("connection", (socket) => {
   socket.on("peer:nego:done", ({ to, ans }) => {
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   });
+
+  socket.on("ice-candidate", ({ to, candidate }) => {
+    io.to(to).emit("ice-candidate", { candidate });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
 });
 
 const PORT = process.env.PORT || 8000;
