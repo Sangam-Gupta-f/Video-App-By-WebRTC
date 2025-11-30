@@ -1,28 +1,38 @@
-// const { Server } = require("socket.io");
-import http from "http";
 import express from "express";
+import http from "http";
 import { Server } from "socket.io";
+import cors from "cors";
 
 const app = express();
+
+app.use(
+  cors({
+    origin: ["https://video-app-by-web-rtc.vercel.app"],
+    methods: ["GET", "POST"],
+  })
+);
+
+app.get("/", (req, res) => {
+  res.send("WebRTC Signaling Server Alive 🚀");
+});
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: ["https://video-app-by-web-rtc.vercel.app"],
+    methods: ["GET", "POST"],
   },
+  transports: ["websocket", "polling"],
 });
 
-const emailToSocketIdMap = new Map();
-const socketidToEmailMap = new Map();
-
 io.on("connection", (socket) => {
-  console.log(`Socket Connected`, socket.id);
+  console.log("Socket connected:", socket.id);
+
   socket.on("room:join", (data) => {
     const { email, room } = data;
-    emailToSocketIdMap.set(email, socket.id);
-    socketidToEmailMap.set(socket.id, email);
-    io.to(room).emit("user:joined", { email, id: socket.id });
     socket.join(room);
+    socket.to(room).emit("user:joined", { email, id: socket.id });
     io.to(socket.id).emit("room:join", data);
   });
 
@@ -35,20 +45,15 @@ io.on("connection", (socket) => {
   });
 
   socket.on("peer:nego:needed", ({ to, offer }) => {
-    console.log("peer:nego:needed", offer);
     io.to(to).emit("peer:nego:needed", { from: socket.id, offer });
   });
 
   socket.on("peer:nego:done", ({ to, ans }) => {
-    console.log("peer:nego:done", ans);
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   });
 });
 
-app.get("/", (req, res) => {
-  res.send("WebRTC signaling server running");
-});
-
-server.listen(process.env.PORT || 8000, () => {
-  console.log("Server running");
+const PORT = process.env.PORT || 8000;
+server.listen(PORT, () => {
+  console.log("Server running on PORT:", PORT);
 });
